@@ -1,0 +1,95 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	-- TABLE CREATION
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- Create AIRPORT Table
+CREATE TABLE AIRPORT --Airport_code, Name, City, State
+(	Airport_Code VARCHAR(255) NOT NULL,
+	[Name] VARCHAR(255) NOT NULL, 
+	City VARCHAR(255) NOT NULL,
+	[State] VARCHAR(255) NOT NULL,
+
+	PRIMARY KEY (Airport_Code)
+);
+
+-- Create FLIGHT Table
+CREATE TABLE FLIGHT --Flight_number, Airline, Weekdays
+(	Flight_number VARCHAR(255) UNIQUE NOT NULL,
+	Airline VARCHAR(255) NOT NULL,
+	Weekdays VARCHAR(255) DEFAULT 0,
+
+	PRIMARY KEY (Flight_number)
+);
+
+-- Create AIRPLANE_TYPE Table
+CREATE TABLE AIRPLANE_TYPE --Airplane_type_name, Max_seats, Company
+(	Airplane_type_name VARCHAR(255) NOT NULL,
+	Max_seats INT NOT NULL CHECK(Max_seats >= 1 AND Max_seats <=600),
+	Company VARCHAR(255) NOT NULL,
+
+	PRIMARY KEY (Airplane_type_name)
+);
+
+-- Create AIRPLANE Table
+CREATE TABLE AIRPLANE --Airplane_id, Total_number_of_seats, Airplane_type
+(	Airplane_id INT UNIQUE NOT NULL,
+	Total_number_of_seats INT CHECK(Total_number_of_seats >=1 AND Total_number_of_seats <= 600) NOT NULL,
+
+	PRIMARY KEY (Airplane_id),
+	Airplane_type VARCHAR(255) FOREIGN KEY REFERENCES AIRPLANE_TYPE(Airplane_type_name)
+);
+
+-- Create FLIGHT_LEG Table
+CREATE TABLE FLIGHT_LEG --Flight_number, Leg_number, Departure_airport_code, Scheduled_departure_time, Arrival_airport_code, Scheduled_arrival_time
+(	Flight_number VARCHAR(255) FOREIGN KEY REFERENCES FLIGHT(Flight_number),
+
+	Leg_number INT CHECK(Leg_number >= 1 AND Leg_number <=4),
+	Departure_airport_code VARCHAR(255) NOT NULL,
+	Scheduled_departure_time TIME NOT NULL,
+	Arrival_airport_code VARCHAR(255) NOT NULL,
+	Scheduled_arrival_time TIME NOT NULL,
+);
+
+-- Create LEG_INSTANCE Table
+CREATE TABLE LEG_INSTANCE --Flight_number, Leg_number, Date:date, Number_of_available_seats, Airplane_id, Departure_airport_code, Departure_time, Arrival_airport_code, Arrival_time
+(	Flight_number VARCHAR(255) FOREIGN KEY REFERENCES FLIGHT(Flight_number),
+	Leg_number INT CHECK(Leg_number >= 1 AND Leg_number <=4),
+
+	[Date] DATE NOT NULL,
+	Number_of_available_seats INT CHECK (Number_of_available_seats >=1 AND Number_of_available_seats <600) NOT NULL,
+
+	Airplane_id INT FOREIGN KEY REFERENCES AIRPLANE(Airplane_id),
+
+	Departure_airport_code VARCHAR(255) NOT NULL,
+	Departure_time TIME NOT NULL,
+	Arrival_airport_code VARCHAR(255) NOT NULL,
+	Arrival_time TIME NOT NULL,
+);
+
+-- Create SEAT_RESERVATION Table
+CREATE TABLE SEAT_RESERVATION --Flight_number, Leg_number, Date:date, Seat_number, Customer_name, Customer_phone
+(	Flight_number VARCHAR(255) FOREIGN KEY REFERENCES FLIGHT(Flight_number),
+
+	Leg_number INT CHECK(Leg_number >= 1 AND Leg_number <=4),
+	[Date] DATE NOT NULL,
+	Seat_number VARCHAR(255) NOT NULL,
+	Customer_name VARCHAR(255) NOT NULL,
+	Customer_phone VARCHAR(255) NOT NULL,
+);
+
+-- Create FARE Table
+CREATE TABLE FARE --Flight_number, Fare_code, Amount, Restrictions
+(	
+	Flight_number VARCHAR(255) FOREIGN KEY REFERENCES FLIGHT(Flight_number),
+
+	Fare_code VARCHAR(255) NOT NULL,
+	Amount INT CHECK(Amount >=0 AND Amount <=1000),
+	Restrictions VARCHAR(255),
+
+);
+
+-- Create CAN_LAND Table
+CREATE TABLE CAN_LAND --Airplane_type_name, Airport_code
+(	Airplane_type_name VARCHAR(255) FOREIGN KEY REFERENCES AIRPLANE_TYPE(Airplane_type_name),
+	Airport_code VARCHAR(255) FOREIGN KEY REFERENCES AIRPORT(Airport_code)
+);

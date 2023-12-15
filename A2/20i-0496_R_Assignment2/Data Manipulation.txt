@@ -1,0 +1,119 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	-- DATA MANIPULATION
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- (a)
+SELECT FLIGHT.Flight_number, Departure_airport_code, Arrival_airport_code
+FROM FLIGHT
+INNER JOIN FLIGHT_LEG
+ON FLIGHT.FLIGHT_number = FLIGHT_LEG.Flight_number;
+
+--(b)
+
+	--This part of (b) query lists flight numbers and weekdays of all flights
+	SELECT FLIGHT.Flight_number, FLIGHT.Weekdays
+	FROM FLIGHT
+
+	-- This part of (b)query only lists flight numbers and weekdays of flight legs that depart from ONT and arrive at LAX
+	SELECT FLIGHT.Flight_number, FLIGHT.Weekdays
+	FROM FLIGHT
+	INNER JOIN FLIGHT_LEG
+	ON (FLIGHT.Flight_number = FLIGHT_LEG.Flight_number)
+	WHERE FLIGHT_LEG.Departure_airport_code = 'ONT' AND FLIGHT_LEG.Arrival_airport_code = 'LAX';
+
+--(c)
+SELECT FLIGHT.Flight_number, FLIGHT_LEG.Departure_airport_code, FLIGHT_LEG.Scheduled_departure_time,
+	   FLIGHT_LEG.Arrival_airport_code, FLIGHT_LEG.Scheduled_arrival_time, FLIGHT.Weekdays
+FROM FLIGHT_LEG
+INNER JOIN FLIGHT
+ON (FLIGHT.Flight_number = FLIGHT_LEG.Flight_number)
+WHERE FLIGHT_LEG.Departure_airport_code='ONT' AND FLIGHT_LEG.Arrival_airport_code = 'LAX';
+
+--(d)
+SELECT *
+FROM FARE
+INNER JOIN FLIGHT
+ON FLIGHT.Flight_number = FARE.Flight_number
+WHERE FARE.Flight_number = 'UA560';
+
+--(e)
+SELECT LEG_INSTANCE.Number_of_available_seats
+FROM LEG_INSTANCE
+WHERE LEG_INSTANCE.Flight_number = 'DL1149' AND LEG_INSTANCE.Date='2018-02-09';
+
+--(f)
+SELECT CAN_LAND.Airplane_type_name
+FROM CAN_LAND
+WHERE CAN_LAND.Airport_code = 'IAD';
+
+--(g)
+SELECT *
+FROM LEG_INSTANCE
+WHERE LEG_INSTANCE.Departure_airport_code = 'ORD' AND LEG_INSTANCE.Arrival_airport_code = 'SAN'
+	  AND LEG_INSTANCE.Number_of_available_seats>2 AND LEG_INSTANCE.Date = '2018-02-09';
+
+--(h)
+SELECT *
+FROM LEG_INSTANCE
+WHERE LEG_INSTANCE.Departure_airport_code = 'MDW' AND LEG_INSTANCE.Arrival_airport_code = 'IAD'
+	  AND LEG_INSTANCE.Date = '2018-08-05';
+
+--(i)
+SELECT LEG_INSTANCE.Flight_number , AVG(FARE.Amount) As Average_Ticket_Cost
+FROM FARE
+INNER JOIN LEG_INSTANCE
+ON (LEG_INSTANCE.Flight_number = FARE.Flight_number)
+WHERE LEG_INSTANCE.Date BETWEEN '2018-01-01' AND '2018-12-31'
+GROUP BY LEG_INSTANCE.Flight_number
+ORDER BY AVG(FARE.Amount);
+
+--(j)
+SELECT COUNT(Flight_number) As Total_number_of_flights
+FROM LEG_INSTANCE;
+
+--(k)
+SELECT SEAT_RESERVATION.Customer_name, COUNT(SEAT_RESERVATION.Customer_name) As Maximum_tickets_booked
+FROM SEAT_RESERVATION
+GROUP BY SEAT_RESERVATION.Customer_name
+ORDER BY COUNT(SEAT_RESERVATION.Customer_name) DESC
+
+--(l)
+SELECT SEAT_RESERVATION.Customer_name, SEAT_RESERVATION.Customer_phone, SEAT_RESERVATION.Flight_number,
+	   LEG_INSTANCE.Date, LEG_INSTANCE.Departure_time As Actual_Departure_Time,
+	   LEG_INSTANCE.Arrival_time As Actual_Arrival_Time,
+	   DATEADD (HOUR , 1 , LEG_INSTANCE.Departure_time ) As Delayed_Departure_Time,
+	   DATEADD (HOUR , 1 , LEG_INSTANCE.Arrival_time ) As Delayed_Arrival_Time
+FROM SEAT_RESERVATION
+INNER JOIN LEG_INSTANCE
+ON (LEG_INSTANCE.Flight_number = SEAT_RESERVATION.Flight_number)
+WHERE LEG_INSTANCE.Date = '2018-01-31' AND LEG_INSTANCE.Departure_airport_code = 'SFO'
+	  AND LEG_INSTANCE.Arrival_airport_code = 'JFK';
+
+--(m)
+SELECT LEG_INSTANCE.Flight_number, LEG_INSTANCE.Departure_airport_code, LEG_INSTANCE.Arrival_airport_code,
+       LEG_INSTANCE.Date, FARE.Amount
+FROM LEG_INSTANCE
+INNER JOIN FARE
+ON (LEG_INSTANCE.Flight_number = FARE.Flight_number)
+WHERE month(LEG_INSTANCE.Date)=1;
+
+--(n)
+SELECT LEG_INSTANCE.Flight_number, LEG_INSTANCE.Date,
+	   LEG_INSTANCE.Departure_airport_code, LEG_INSTANCE.Arrival_airport_code,
+	   ABS(DATEDIFF(MINUTE, LEG_INSTANCE.Departure_time, LEG_INSTANCE.Arrival_time)) As Duration
+FROM LEG_INSTANCE
+WHERE ABS(DATEDIFF(MINUTE, LEG_INSTANCE.Departure_time, LEG_INSTANCE.Arrival_time)) < '70'; --70 minutes = 1hr 10 mins
+
+--(o)
+
+SELECT SEAT_RESERVATION.Customer_name, COUNT(SEAT_RESERVATION.Customer_name) As Maximum_Tickets_Booked
+FROM SEAT_RESERVATION
+GROUP BY SEAT_RESERVATION.Customer_name
+HAVING COUNT(SEAT_RESERVATION.Customer_name) = 
+	(SELECT MAX(Maximum_Tickets_Booked) 
+	 FROM (SELECT COUNT(SEAT_RESERVATION.Flight_number) as Maximum_Tickets_Booked 
+		   FROM SEAT_RESERVATION 
+		   GROUP BY SEAT_RESERVATION.Customer_name) As [Max]) 
+		   ORDER BY SEAT_RESERVATION.Customer_name;
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
