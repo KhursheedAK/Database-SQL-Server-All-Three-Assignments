@@ -8,10 +8,11 @@ Assignment 1 (A1): ERD (Included in Report) for
 • Kar-e-Khair Foundation
 
 Assignment 2 (A2): Airline Reservation Relational Database | Read Statement.pdf for further details
-* Created three txt files:
+Created three txt files:
 • Data Manipulation
 • Data Insertion
 • Database Creation
+
 Utilized SQL Server to create and test the SQL queries
 
 Assignment 3 (A3): Healthcare Scheduling created using SQL Server | Read Statement.pdf for further details
